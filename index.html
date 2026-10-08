@@ -1,0 +1,1204 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>LaLiga 2026/27 – Eredménykövető</title>
+
+<style>
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: Arial, Helvetica, sans-serif;
+    background: #f1f4f8;
+    color: #172033;
+}
+
+header {
+    background: linear-gradient(135deg, #071b42, #d90032);
+    color: white;
+    padding: 28px 20px;
+    text-align: center;
+}
+
+header h1 {
+    margin: 0;
+    font-size: 34px;
+}
+
+header p {
+    margin: 8px 0 0;
+    opacity: .9;
+}
+
+.container {
+    max-width: 1250px;
+    margin: 25px auto;
+    padding: 0 15px;
+}
+
+.controls {
+    background: white;
+    padding: 18px;
+    border-radius: 15px;
+    box-shadow: 0 4px 15px rgba(0,0,0,.08);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 15px;
+    flex-wrap: wrap;
+}
+
+button,
+select {
+    border: none;
+    border-radius: 10px;
+    padding: 12px 18px;
+    font-size: 15px;
+    cursor: pointer;
+}
+
+button {
+    background: #082052;
+    color: white;
+    font-weight: bold;
+}
+
+button:hover {
+    opacity: .85;
+}
+
+select {
+    background: #eef1f6;
+}
+
+.round-title {
+    text-align: center;
+    margin: 25px 0 15px;
+}
+
+.round-title h2 {
+    margin-bottom: 5px;
+}
+
+.round-title p {
+    color: #687386;
+}
+
+.matches {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 15px;
+}
+
+.match {
+    background: white;
+    border-radius: 16px;
+    padding: 17px;
+    box-shadow: 0 4px 15px rgba(0,0,0,.07);
+    position: relative;
+}
+
+.match.played {
+    border-left: 5px solid #159447;
+}
+
+.match.upcoming {
+    border-left: 5px solid #b9c0ca;
+}
+
+.match-date {
+    text-align: center;
+    color: #777;
+    font-size: 13px;
+    margin-bottom: 12px;
+}
+
+.teams {
+    display: grid;
+    grid-template-columns: 1fr 80px 1fr;
+    align-items: center;
+    gap: 10px;
+}
+
+.team {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    font-weight: bold;
+    font-size: 14px;
+}
+
+.team.away {
+    flex-direction: column;
+}
+
+.logo {
+    width: 50px;
+    height: 50px;
+    object-fit: contain;
+    margin-bottom: 8px;
+}
+
+.score {
+    text-align: center;
+    font-size: 25px;
+    font-weight: bold;
+}
+
+.vs {
+    color: #999;
+    font-size: 14px;
+}
+
+.status {
+    text-align: center;
+    margin-top: 12px;
+    font-size: 12px;
+    font-weight: bold;
+}
+
+.played .status {
+    color: #159447;
+}
+
+.upcoming .status {
+    color: #8a8f99;
+}
+
+.table-section {
+    margin-top: 35px;
+}
+
+.table-section h2 {
+    text-align: center;
+}
+
+.table-wrapper {
+    overflow-x: auto;
+    background: white;
+    border-radius: 15px;
+    box-shadow: 0 4px 15px rgba(0,0,0,.07);
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 700px;
+}
+
+th,
+td {
+    padding: 11px 8px;
+    text-align: center;
+    border-bottom: 1px solid #edf0f4;
+}
+
+th {
+    background: #081f4c;
+    color: white;
+}
+
+.team-cell {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    text-align: left;
+    font-weight: bold;
+}
+
+.small-logo {
+    width: 30px;
+    height: 30px;
+    object-fit: contain;
+}
+
+.position {
+    font-weight: bold;
+}
+
+.champions {
+    background: rgba(35, 100, 220, .08);
+}
+
+.europa {
+    background: rgba(240, 180, 20, .10);
+}
+
+.relegation {
+    background: rgba(220, 40, 40, .10);
+}
+
+footer {
+    margin-top: 40px;
+    padding: 25px;
+    text-align: center;
+    background: #08152f;
+    color: white;
+}
+
+@media(max-width:600px) {
+    header h1 {
+        font-size: 25px;
+    }
+
+    .teams {
+        grid-template-columns: 1fr 65px 1fr;
+    }
+
+    .logo {
+        width: 42px;
+        height: 42px;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<header>
+    <h1>🇪🇸 LaLiga EA SPORTS 2026/27</h1>
+    <p>Hivatalos 38 fordulós eredménykövető</p>
+</header>
+
+<div class="container">
+
+    <div class="controls">
+
+        <button onclick="previousRound()">⬅ Előző</button>
+
+        <select id="roundSelect" onchange="changeRound()"></select>
+
+        <button onclick="nextRound()">Következő ➡</button>
+
+        <select id="teamFilter" onchange="renderRound()">
+            <option value="all">⚽ Összes csapat</option>
+        </select>
+
+    </div>
+
+    <div class="round-title">
+        <h2 id="roundName"></h2>
+        <p id="roundDate"></p>
+    </div>
+
+    <div id="matches" class="matches"></div>
+
+    <section class="table-section">
+
+        <h2>📊 Tabella</h2>
+
+        <div class="table-wrapper">
+            <table>
+
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Csapat</th>
+                        <th>M</th>
+                        <th>GY</th>
+                        <th>D</th>
+                        <th>V</th>
+                        <th>LG</th>
+                        <th>KG</th>
+                        <th>GK</th>
+                        <th>P</th>
+                    </tr>
+                </thead>
+
+                <tbody id="standings"></tbody>
+
+            </table>
+        </div>
+
+    </section>
+
+</div>
+
+<footer>
+    LaLiga EA SPORTS 2026/27 • 20 csapat • 38 forduló
+</footer>
+
+
+<script>
+
+/* =========================================================
+   CSAPATOK
+========================================================= */
+
+const teams = {
+
+    ALA: {
+        name: "Deportivo Alavés",
+        logo: "https://upload.wikimedia.org/wikipedia/en/thumb/6/6a/Deportivo_Alaves_logo.svg/200px-Deportivo_Alaves_logo.svg.png"
+    },
+
+    ATH: {
+        name: "Athletic Club",
+        logo: "https://upload.wikimedia.org/wikipedia/en/thumb/9/98/Club_Athletic_Bilbao_logo.svg/200px-Club_Athletic_Bilbao_logo.svg.png"
+    },
+
+    ATM: {
+        name: "Atlético Madrid",
+        logo: "https://upload.wikimedia.org/wikipedia/en/thumb/9/9a/Atletico_Madrid_logo_2017.svg/200px-Atletico_Madrid_logo_2017.svg.png"
+    },
+
+    BAR: {
+        name: "FC Barcelona",
+        logo: "https://upload.wikimedia.org/wikipedia/en/thumb/4/47/FC_Barcelona_%28crest%29.svg/200px-FC_Barcelona_%28crest%29.svg.png"
+    },
+
+    BET: {
+        name: "Real Betis",
+        logo: "https://upload.wikimedia.org/wikipedia/en/thumb/1/13/Real_betis_logo.svg/200px-Real_betis_logo.svg.png"
+    },
+
+    CEL: {
+        name: "Celta",
+        logo: "https://upload.wikimedia.org/wikipedia/en/thumb/1/12/RC_Celta_de_Vigo_logo.svg/200px-RC_Celta_de_Vigo_logo.svg.png"
+    },
+
+    DEP: {
+        name: "RC Deportivo",
+        logo: "https://upload.wikimedia.org/wikipedia/en/thumb/2/2e/Deportivo_de_La_Coru%C3%B1a_logo.svg/200px-Deportivo_de_La_Coru%C3%B1a_logo.svg.png"
+    },
+
+    ELC: {
+        name: "Elche CF",
+        logo: "https://upload.wikimedia.org/wikipedia/en/thumb/1/1b/Elche_CF_logo.svg/200px-Elche_CF_logo.svg.png"
+    },
+
+    ESP: {
+        name: "Espanyol",
+        logo: "https://upload.wikimedia.org/wikipedia/en/thumb/6/6f/Rcd_espanyol_logo.svg/200px-Rcd_espanyol_logo.svg.png"
+    },
+
+    GET: {
+        name: "Getafe CF",
+        logo: "https://upload.wikimedia.org/wikipedia/en/thumb/4/46/Getafe_logo.svg/200px-Getafe_logo.svg.png"
+    },
+
+    LEV: {
+        name: "Levante UD",
+        logo: "https://upload.wikimedia.org/wikipedia/en/thumb/7/7c/Levante_UD_logo.svg/200px-Levante_UD_logo.svg.png"
+    },
+
+    MGA: {
+        name: "Málaga CF",
+        logo: "https://upload.wikimedia.org/wikipedia/en/thumb/3/3b/Malaga_CF.svg/200px-Malaga_CF.svg.png"
+    },
+
+    OSA: {
+        name: "CA Osasuna",
+        logo: "https://upload.wikimedia.org/wikipedia/en/thumb/3/3b/CA_Osasuna_logo.svg/200px-CA_Osasuna_logo.svg.png"
+    },
+
+    RAY: {
+        name: "Rayo Vallecano",
+        logo: "https://upload.wikimedia.org/wikipedia/en/thumb/1/1d/Rayo_Vallecano_logo.svg/200px-Rayo_Vallecano_logo.svg.png"
+    },
+
+    RAC: {
+        name: "Racing Santander",
+        logo: "https://upload.wikimedia.org/wikipedia/en/thumb/5/5d/Racing_Santander_crest.svg/200px-Racing_Santander_crest.svg.png"
+    },
+
+    RMA: {
+        name: "Real Madrid",
+        logo: "https://upload.wikimedia.org/wikipedia/en/thumb/5/56/Real_Madrid_CF.svg/200px-Real_Madrid_CF.svg.png"
+    },
+
+    RSO: {
+        name: "Real Sociedad",
+        logo: "https://upload.wikimedia.org/wikipedia/en/thumb/f/f1/Real_Sociedad_logo.svg/200px-Real_Sociedad_logo.svg.png"
+    },
+
+    SEV: {
+        name: "Sevilla FC",
+        logo: "https://upload.wikimedia.org/wikipedia/en/thumb/3/3b/Sevilla_FC_logo.svg/200px-Sevilla_FC_logo.svg.png"
+    },
+
+    VAL: {
+        name: "Valencia CF",
+        logo: "https://upload.wikimedia.org/wikipedia/en/thumb/c/ce/Valencia_CF_logo.svg/200px-Valencia_CF_logo.svg.png"
+    },
+
+    VIL: {
+        name: "Villarreal CF",
+        logo: "https://upload.wikimedia.org/wikipedia/en/thumb/7/70/Villarreal_CF_logo.svg/200px-Villarreal_CF_logo.svg.png"
+    }
+
+};
+
+
+/* =========================================================
+   HIVATALOS 2026/27 MENETREND
+========================================================= */
+
+const rounds = [
+
+/* 1 */
+{
+date:"16.08.2026",
+games:[
+["ALA","GET"],["ATM","MGA"],["CEL","OSA"],["DEP","ELC"],
+["ESP","LEV"],["BAR","ATH"],["RAC","VIL"],["RMA","RSO"],
+["SEV","RAY"],["VAL","BET"]
+]},
+
+/* 2 */
+{
+date:"23.08.2026",
+games:[
+["ATH","SEV"],["ATM","VIL"],["BET","RSO"],["ELC","BAR"],
+["ESP","RMA"],["GET","RAC"],["MGA","DEP"],["OSA","LEV"],
+["RAY","ALA"],["VAL","CEL"]
+]},
+
+/* 3 */
+{
+date:"30.08.2026",
+games:[
+["ALA","VIL"],["CEL","ATH"],["DEP","VAL"],["BAR","RAY"],
+["LEV","BET"],["OSA","GET"],["RAC","ELC"],["RMA","MGA"],
+["RSO","ESP"],["SEV","ATM"]
+]},
+
+/* 4 */
+{
+date:"06.09.2026",
+games:[
+["ALA","OSA"],["ATH","ATM"],["BET","RMA"],["ELC","RSO"],
+["ESP","SEV"],["GET","CEL"],["MGA","LEV"],["RAY","RAC"],
+["VAL","BAR"],["VIL","DEP"]
+]},
+
+/* 5 */
+{
+date:"13.09.2026",
+games:[
+["ATH","ELC"],["CEL","MGA"],["GET","DEP"],["LEV","BAR"],
+["OSA","ESP"],["RAC","ALA"],["RMA","RAY"],["RSO","ATM"],
+["SEV","VAL"],["VIL","BET"]
+]},
+
+/* 6 */
+{
+date:"16.09.2026",
+games:[
+["ALA","VAL"],["ATM","OSA"],["BET","GET"],["DEP","SEV"],
+["ELC","RMA"],["BAR","RAC"],["LEV","ATH"],["MGA","VIL"],
+["RAY","ESP"],["RSO","CEL"]
+]},
+
+/* 7 */
+{
+date:"20.09.2026",
+games:[
+["ATH","ALA"],["ATM","RMA"],["CEL","RAC"],["DEP","BET"],
+["ESP","ELC"],["GET","MGA"],["OSA","RAY"],["SEV","BAR"],
+["VAL","RSO"],["VIL","LEV"]
+]},
+
+/* 8 */
+{
+date:"11.10.2026",
+games:[
+["ALA","ATM"],["BET","OSA"],["ELC","CEL"],["BAR","GET"],
+["LEV","SEV"],["MGA","ESP"],["RAC","VAL"],["RAY","ATH"],
+["RMA","VIL"],["RSO","DEP"]
+]},
+
+/* 9 */
+{
+date:"18.10.2026",
+games:[
+["BET","BAR"],["CEL","ALA"],["DEP","LEV"],["ESP","ATM"],
+["GET","RAY"],["MGA","RSO"],["OSA","RAC"],["RMA","SEV"],
+["VAL","ATH"],["VIL","ELC"]
+]},
+
+/* 10 */
+{
+date:"25.10.2026",
+games:[
+["ALA","MGA"],["ATH","GET"],["ATM","DEP"],["CEL","BET"],
+["BAR","RMA"],["RAC","ESP"],["RAY","ELC"],["RSO","LEV"],
+["SEV","OSA"],["VAL","VIL"]
+]},
+
+/* 11 */
+{
+date:"01.11.2026",
+games:[
+["ATH","RSO"],["BET","MGA"],["DEP","OSA"],["ELC","VAL"],
+["BAR","ALA"],["GET","SEV"],["LEV","ATM"],["RAC","RMA"],
+["RAY","CEL"],["VIL","ESP"]
+]},
+
+/* 12 */
+{
+date:"08.11.2026",
+games:[
+["ATM","BAR"],["CEL","LEV"],["ELC","BET"],["ESP","DEP"],
+["MGA","RAC"],["OSA","ATH"],["RSO","RAY"],["SEV","ALA"],
+["VAL","RMA"],["VIL","GET"]
+]},
+
+/* 13 */
+{
+date:"22.11.2026",
+games:[
+["ALA","DEP"],["ATH","ESP"],["BAR","VIL"],["GET","ATM"],
+["LEV","ELC"],["OSA","MGA"],["RAC","RSO"],["RAY","VAL"],
+["RMA","CEL"],["SEV","BET"]
+]},
+
+/* 14 */
+{
+date:"29.11.2026",
+games:[
+["BET","RAY"],["CEL","VIL"],["DEP","BAR"],["ELC","ATM"],
+["ESP","GET"],["LEV","RAC"],["MGA","ATH"],["RMA","ALA"],
+["RSO","SEV"],["VAL","OSA"]
+]},
+
+/* 15 */
+{
+date:"06.12.2026",
+games:[
+["ALA","ESP"],["ATH","RMA"],["ATM","BET"],["BAR","CEL"],
+["GET","VAL"],["OSA","ELC"],["RAC","DEP"],["RAY","LEV"],
+["SEV","MGA"],["VIL","RSO"]
+]},
+
+/* 16 */
+{
+date:"13.12.2026",
+games:[
+["ATM","VAL"],["BET","RAC"],["DEP","ATH"],["ELC","SEV"],
+["ESP","CEL"],["LEV","ALA"],["MGA","BAR"],["RMA","OSA"],
+["RSO","GET"],["VIL","RAY"]
+]},
+
+/* 17 */
+{
+date:"20.12.2026",
+games:[
+["ALA","ELC"],["ATH","BET"],["CEL","ATM"],["DEP","RMA"],
+["BAR","RSO"],["GET","LEV"],["OSA","VIL"],["RAY","MGA"],
+["SEV","RAC"],["VAL","ESP"]
+]},
+
+/* 18 */
+{
+date:"03.01.2027",
+games:[
+["BET","ALA"],["CEL","DEP"],["ESP","BAR"],["LEV","VAL"],
+["MGA","ELC"],["RAC","ATH"],["RAY","ATM"],["RMA","GET"],
+["RSO","OSA"],["VIL","SEV"]
+]},
+
+/* 19 */
+{
+date:"10.01.2027",
+games:[
+["ALA","RSO"],["ATH","VIL"],["ATM","RAC"],["DEP","RAY"],
+["ELC","GET"],["ESP","BET"],["OSA","BAR"],["RMA","LEV"],
+["SEV","CEL"],["VAL","MGA"]
+]},
+
+/* 20 */
+{
+date:"17.01.2027",
+games:[
+["ATM","RSO"],["BET","DEP"],["CEL","VAL"],["BAR","ELC"],
+["GET","ATH"],["LEV","ESP"],["MGA","RMA"],["RAC","OSA"],
+["RAY","SEV"],["VIL","ALA"]
+]},
+
+/* 21 */
+{
+date:"24.01.2027",
+games:[
+["ALA","BAR"],["ATH","LEV"],["DEP","ATM"],["ELC","RAY"],
+["ESP","VIL"],["GET","OSA"],["RAC","CEL"],["RMA","BET"],
+["RSO","MGA"],["VAL","SEV"]
+]},
+
+/* 22 */
+{
+date:"31.01.2027",
+games:[
+["ATM","ESP"],["BET","ELC"],["CEL","GET"],["BAR","VAL"],
+["LEV","RSO"],["MGA","ALA"],["OSA","DEP"],["RAY","RMA"],
+["SEV","ATH"],["VIL","RAC"]
+]},
+
+/* 23 */
+{
+date:"07.02.2027",
+games:[
+["ALA","CEL"],["ATH","OSA"],["BET","SEV"],["DEP","MGA"],
+["ELC","LEV"],["ESP","RAY"],["BAR","ATM"],["GET","VIL"],
+["RSO","RMA"],["VAL","RAC"]
+]},
+
+/* 24 */
+{
+date:"14.02.2027",
+games:[
+["CEL","RAY"],["ELC","DEP"],["LEV","MGA"],["OSA","ATM"],
+["RAC","GET"],["RMA","ATH"],["RSO","BET"],["SEV","ESP"],
+["VAL","ALA"],["VIL","BAR"]
+]},
+
+/* 25 */
+{
+date:"21.02.2027",
+games:[
+["ALA","RAC"],["ATH","CEL"],["ATM","ELC"],["DEP","RSO"],
+["ESP","OSA"],["BAR","LEV"],["MGA","BET"],["RAY","GET"],
+["SEV","RMA"],["VIL","VAL"]
+]},
+
+/* 26 */
+{
+date:"28.02.2027",
+games:[
+["ATH","BAR"],["BET","VIL"],["CEL","ESP"],["GET","ALA"],
+["LEV","DEP"],["MGA","ATM"],["OSA","SEV"],["RAC","RAY"],
+["RMA","VAL"],["RSO","ELC"]
+]},
+
+/* 27 */
+{
+date:"07.03.2027",
+games:[
+["ALA","ATH"],["ATM","CEL"],["DEP","GET"],["ELC","MGA"],
+["ESP","RAC"],["BAR","BET"],["RAY","OSA"],["SEV","RSO"],
+["VAL","LEV"],["VIL","RMA"]
+]},
+
+/* 28 */
+{
+date:"14.03.2027",
+games:[
+["ALA","SEV"],["ATH","VAL"],["BET","LEV"],["ELC","VIL"],
+["BAR","DEP"],["GET","RSO"],["MGA","RAY"],["OSA","CEL"],
+["RAC","ATM"],["RMA","ESP"]
+]},
+
+/* 29 */
+{
+date:"21.03.2027",
+games:[
+["ATM","GET"],["CEL","RMA"],["ESP","ATH"],["LEV","OSA"],
+["RAC","BET"],["RAY","BAR"],["RSO","ALA"],["SEV","ELC"],
+["VAL","DEP"],["VIL","MGA"]
+]},
+
+/* 30 */
+{
+date:"04.04.2027",
+games:[
+["ATH","RAC"],["BET","CEL"],["DEP","VIL"],["ELC","ALA"],
+["BAR","SEV"],["GET","ESP"],["LEV","RAY"],["MGA","OSA"],
+["RMA","ATM"],["RSO","VAL"]
+]},
+
+/* 31 */
+{
+date:"11.04.2027",
+games:[
+["ALA","BET"],["ATM","LEV"],["CEL","ELC"],["ESP","MGA"],
+["OSA","RMA"],["RAC","BAR"],["RAY","RSO"],["SEV","DEP"],
+["VAL","GET"],["VIL","ATH"]
+]},
+
+/* 32 */
+{
+date:"18.04.2027",
+games:[
+["ALA","RAY"],["ATM","SEV"],["BET","ATH"],["DEP","CEL"],
+["ELC","OSA"],["BAR","ESP"],["GET","RMA"],["LEV","VIL"],
+["MGA","VAL"],["RSO","RAC"]
+]},
+
+/* 33 */
+{
+date:"21.04.2027",
+games:[
+["ATH","DEP"],["CEL","BAR"],["ESP","RSO"],["GET","BET"],
+["OSA","ALA"],["RAC","MGA"],["RMA","ELC"],["SEV","LEV"],
+["VAL","RAY"],["VIL","ATM"]
+]},
+
+/* 34 */
+{
+date:"02.05.2027",
+games:[
+["ATM","ALA"],["BET","VAL"],["CEL","SEV"],["DEP","RAC"],
+["ELC","ESP"],["BAR","OSA"],["LEV","RMA"],["MGA","GET"],
+["RAY","VIL"],["RSO","ATH"]
+]},
+
+/* 35 */
+{
+date:"09.05.2027",
+games:[
+["ALA","LEV"],["ATH","MGA"],["BET","ESP"],["GET","ELC"],
+["OSA","RSO"],["RAC","SEV"],["RAY","DEP"],["RMA","BAR"],
+["VAL","ATM"],["VIL","CEL"]
+]},
+
+/* 36 */
+{
+date:"16.05.2027",
+games:[
+["ATM","RAY"],["DEP","ALA"],["ELC","ATH"],["ESP","VAL"],
+["LEV","GET"],["MGA","CEL"],["OSA","BET"],["RMA","RAC"],
+["RSO","BAR"],["SEV","VIL"]
+]},
+
+/* 37 */
+{
+date:"23.05.2027",
+games:[
+["ALA","RMA"],["ATM","ATH"],["CEL","RSO"],["DEP","ESP"],
+["BAR","MGA"],["RAC","LEV"],["RAY","BET"],["SEV","GET"],
+["VAL","ELC"],["VIL","OSA"]
+]},
+
+/* 38 */
+{
+date:"30.05.2027",
+games:[
+["ATH","RAY"],["BET","ATM"],["ELC","RAC"],["ESP","ALA"],
+["GET","BAR"],["LEV","CEL"],["MGA","SEV"],["OSA","VAL"],
+["RMA","DEP"],["RSO","VIL"]
+]}
+
+];
+
+
+/* =========================================================
+   KEZDŐ ÁLLAPOT
+========================================================= */
+
+let currentRound = 7;
+
+
+/* eredmények
+   formátum:
+   "forduló-index_meccs-index": [hazai gól, vendég gól]
+
+   Példa:
+   results["0_0"] = [2,1]
+*/
+
+const results = {};
+
+
+/* =========================================================
+   FORDULÓVÁLASZTÓ
+========================================================= */
+
+const roundSelect = document.getElementById("roundSelect");
+
+rounds.forEach((round, index) => {
+
+    const option = document.createElement("option");
+
+    option.value = index;
+    option.textContent =
+        `${index + 1}. forduló – ${round.date}`;
+
+    roundSelect.appendChild(option);
+
+});
+
+
+/* =========================================================
+   CSAPATSZŰRŐ
+========================================================= */
+
+const teamFilter = document.getElementById("teamFilter");
+
+Object.keys(teams)
+    .sort((a,b) =>
+        teams[a].name.localeCompare(teams[b].name)
+    )
+    .forEach(code => {
+
+        const option = document.createElement("option");
+
+        option.value = code;
+        option.textContent = teams[code].name;
+
+        teamFilter.appendChild(option);
+
+    });
+
+
+/* =========================================================
+   FORDULÓ MEGJELENÍTÉSE
+========================================================= */
+
+function renderRound() {
+
+    roundSelect.value = currentRound;
+
+    const round = rounds[currentRound];
+
+    document.getElementById("roundName").textContent =
+        `${currentRound + 1}. forduló`;
+
+    document.getElementById("roundDate").textContent =
+        `Hivatalos forduló: ${round.date}`;
+
+    const matches = document.getElementById("matches");
+
+    matches.innerHTML = "";
+
+    const filter = teamFilter.value;
+
+    round.games.forEach((game, index) => {
+
+        const home = game[0];
+        const away = game[1];
+
+        if (
+            filter !== "all" &&
+            home !== filter &&
+            away !== filter
+        ) {
+            return;
+        }
+
+        const resultKey = `${currentRound}_${index}`;
+
+        const hasResult =
+            results[resultKey] !== undefined;
+
+        const homeScore =
+            hasResult ? results[resultKey][0] : "-";
+
+        const awayScore =
+            hasResult ? results[resultKey][1] : "-";
+
+        const card = document.createElement("div");
+
+        card.className =
+            "match " +
+            (hasResult ? "played" : "upcoming");
+
+        card.innerHTML = `
+
+            <div class="match-date">
+                ${round.date}
+            </div>
+
+            <div class="teams">
+
+                <div class="team">
+                    <img
+                        class="logo"
+                        src="${teams[home].logo}"
+                        alt="${teams[home].name}"
+                    >
+
+                    <span>
+                        ${teams[home].name}
+                    </span>
+                </div>
+
+                <div class="score">
+
+                    ${
+                        hasResult
+                        ? `<strong>${homeScore} - ${awayScore}</strong>`
+                        : `<span class="vs">VS</span>`
+                    }
+
+                </div>
+
+                <div class="team away">
+
+                    <img
+                        class="logo"
+                        src="${teams[away].logo}"
+                        alt="${teams[away].name}"
+                    >
+
+                    <span>
+                        ${teams[away].name}
+                    </span>
+
+                </div>
+
+            </div>
+
+            <div class="status">
+
+                ${
+                    hasResult
+                    ? "✓ LEJÁTSZVA"
+                    : "○ MÉG NEM JÁTSZOTTÁK LE"
+                }
+
+            </div>
+
+        `;
+
+        matches.appendChild(card);
+
+    });
+
+    renderStandings();
+}
+
+
+/* =========================================================
+   TABELLÁHOZ ADATOK
+========================================================= */
+
+function createTable() {
+
+    const table = {};
+
+    Object.keys(teams).forEach(code => {
+
+        table[code] = {
+
+            team: code,
+            played: 0,
+            wins: 0,
+            draws: 0,
+            losses: 0,
+            gf: 0,
+            ga: 0,
+            points: 0
+
+        };
+
+    });
+
+    return table;
+}
+
+
+/* =========================================================
+   TABELLA
+========================================================= */
+
+function renderStandings() {
+
+    const table = createTable();
+
+    rounds.forEach((round, rIndex) => {
+
+        round.games.forEach((game, gIndex) => {
+
+            const key = `${rIndex}_${gIndex}`;
+
+            if (!results[key]) return;
+
+            const home = game[0];
+            const away = game[1];
+
+            const hg = results[key][0];
+            const ag = results[key][1];
+
+            table[home].played++;
+            table[away].played++;
+
+            table[home].gf += hg;
+            table[home].ga += ag;
+
+            table[away].gf += ag;
+            table[away].ga += hg;
+
+            if (hg > ag) {
+
+                table[home].wins++;
+                table[home].points += 3;
+
+                table[away].losses++;
+
+            }
+            else if (hg < ag) {
+
+                table[away].wins++;
+                table[away].points += 3;
+
+                table[home].losses++;
+
+            }
+            else {
+
+                table[home].draws++;
+                table[away].draws++;
+
+                table[home].points++;
+                table[away].points++;
+
+            }
+
+        });
+
+    });
+
+
+    const sorted = Object.values(table).sort((a,b) => {
+
+        const points =
+            b.points - a.points;
+
+        if (points !== 0)
+            return points;
+
+        const gd =
+            (b.gf - b.ga) -
+            (a.gf - a.ga);
+
+        if (gd !== 0)
+            return gd;
+
+        return b.gf - a.gf;
+
+    });
+
+
+    const tbody =
+        document.getElementById("standings");
+
+    tbody.innerHTML = "";
+
+
+    sorted.forEach((team, index) => {
+
+        const position = index + 1;
+
+        let rowClass = "";
+
+        if (position <= 4)
+            rowClass = "champions";
+
+        else if (position <= 6)
+            rowClass = "europa";
+
+        else if (position >= 18)
+            rowClass = "relegation";
+
+
+        const row =
+            document.createElement("tr");
+
+        row.className = rowClass;
+
+
+        row.innerHTML = `
+
+            <td class="position">
+                ${position}
+            </td>
+
+            <td>
+
+                <div class="team-cell">
+
+                    <img
+                        class="small-logo"
+                        src="${teams[team.team].logo}"
+                    >
+
+                    ${teams[team.team].name}
+
+                </div>
+
+            </td>
+
+            <td>${team.played}</td>
+            <td>${team.wins}</td>
+            <td>${team.draws}</td>
+            <td>${team.losses}</td>
+            <td>${team.gf}</td>
+            <td>${team.ga}</td>
+            <td>${team.gf - team.ga > 0 ? "+" : ""}${team.gf - team.ga}</td>
+            <td><strong>${team.points}</strong></td>
+
+        `;
+
+        tbody.appendChild(row);
+
+    });
+
+}
+
+
+/* =========================================================
+   NAVIGÁCIÓ
+========================================================= */
+
+function previousRound() {
+
+    if (currentRound > 0) {
+
+        currentRound--;
+
+        renderRound();
+
+        window.scrollTo({
+            top: 0,
+            behavior: "smooth"
+        });
+
+    }
+
+}
+
+
+function nextRound() {
+
+    if (currentRound < rounds.length - 1) {
+
+        currentRound++;
+
+        renderRound();
+
+        window.scrollTo({
+            top: 0,
+            behavior: "smooth"
+        });
+
+    }
+
+}
+
+
+function changeRound() {
+
+    currentRound =
+        Number(roundSelect.value);
+
+    renderRound();
+
+}
+
+
+/* =========================================================
+   INDÍTÁS
+========================================================= */
+
+renderRound();
+
+</script>
+
+</body>
+</html>
